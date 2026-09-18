@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NALAROO - Belajar Asyik, Nalar Makin Cerdik!</title>
+    <!-- Google Fonts: Roboto & Fredoka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                        playful: ['Fredoka', 'Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            letter-spacing: 0.015em;
+        }
+        .font-playful {
+            font-family: 'Fredoka', 'Roboto', sans-serif;
+        }
+        input, button, select, textarea {
+            font-family: 'Roboto', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-sky-200 selection:text-sky-900">
+
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-sky-100 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <!-- Brand & Mascot -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-md shadow-sky-500/20 transform hover:scale-105 transition">
+                    🦉
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-playful font-bold text-2xl text-sky-900 leading-none">NALAROO</h1>
+                        <span class="bg-sky-100 text-sky-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-sky-200">v3.0</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-500 hidden sm:block">Belajar Asyik, Nalar Makin Cerdik!</p>
+                </div>
+            </div>
+
+            <!-- Global Controls & Score -->
+            <div class="flex items-center gap-3">
+                <!-- Audio Controls (BGM & Narrator Volume) -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-3 text-xs">
+                    <div class="flex items-center gap-1.5" title="Volume Musik Latar">
+                        <button id="bgmToggleBtn" onclick="toggleBgm()" class="text-slate-600 hover:text-sky-600 transition">
+                            <i id="bgmIcon" class="fa-solid fa-music"></i>
+                        </button>
+                        <input type="range" id="bgmVolumeSlider" min="0" max="1" step="0.05" value="0.3" oninput="updateBgmVolume(this.value)" class="w-14 accent-sky-600 cursor-pointer">
+                    </div>
+                    <div class="h-4 w-px bg-slate-300"></div>
+                    <div class="flex items-center gap-1.5" title="Volume Narator Suara">
+                        <i class="fa-solid fa-volume-high text-sky-600"></i>
+                        <input type="range" id="narratorVolumeSlider" min="0" max="1" step="0.05" value="1.0" oninput="updateNarratorVolume(this.value)" class="w-14 accent-sky-600 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Player Badge -->
+                <div id="playerBadge" class="hidden items-center gap-2 bg-sky-50 border border-sky-200 rounded-xl px-3 py-1.5 text-xs font-medium text-sky-800">
+                    <span id="playerAvatarDisplay">🐰</span>
+                    <span id="playerNameDisplay" class="font-bold">Siswa</span>
+                    <span class="bg-sky-600 text-white font-bold px-2 py-0.5 rounded-md text-[11px]" id="playerScoreDisplay">0 Pts</span>
+                </div>
+
+                <!-- Teacher Mode Button -->
+                <button onclick="openTeacherLoginModal()" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span class="hidden md:inline">Mode Guru</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+
+        <!-- Segment Navigation Tabs (Memanjang ke Kanan / Horizontal Scroll) -->
+        <nav class="bg-white rounded-2xl p-2 border border-slate-200 shadow-sm overflow-x-auto custom-scrollbar">
+            <div id="segmentTabs" class="flex items-center gap-2 min-w-max flex-nowrap">
+                <!-- Dynamic tabs generated by JavaScript -->
+            </div>
+        </nav>
+
+        <!-- Segment Content View -->
+        <div id="segmentViewContainer" class="flex flex-col gap-6">
+            <!-- Active Segment Content generated dynamically -->
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500">
+            <p><strong>NALAROO</strong> &copy; 2026 - Petualangan Literasi & Numerasi Ceria. Belajar Asyik, Nalar Makin Cerdik!</p>
+        </div>
+    </footer>
+
+    <div id="welcomeModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-sky-100 flex flex-col gap-5 text-center relative overflow-hidden">
+            <div class="w-20 h-20 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-4xl text-white shadow-lg shadow-sky-500/30 transform hover:rotate-6 transition">
+                🦉
+            </div>
+            <div>
+                <h2 class="font-playful font-bold text-3xl text-sky-950">Selamat Datang di NALAROO!</h2>
+                <p class="text-slate-600 text-sm mt-1">Belajar Asyik, Nalar Makin Cerdik!</p>
+            </div>
+
+            <form onsubmit="submitWelcomeForm(event)" class="flex flex-col gap-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Kamu:</label>
+                    <input type="text" id="welcomeNameInput" required placeholder="Ketik nama lengkap atau panggilan..." class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Avatar Lucu:</label>
+                    <div class="grid grid-cols-6 gap-2" id="avatarSelectorGrid">
+                        <!-- Avatars dynamically populated -->
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-playful font-bold text-base py-3.5 rounded-xl shadow-md hover:shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2 mt-2">
+                    <span>Mulai Petualangan!</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Modul Guru & Administrator:</span>
+                <button type="button" onclick="openTeacherLoginModal()" class="text-amber-600 font-bold hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-key"></i> Mode Guru
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="teacherLoginModal" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-amber-200 flex flex-col gap-4 text-center relative">
+            <button onclick="closeTeacherLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <div>
+                <h3 class="font-playful font-bold text-xl text-slate-900">Akses Mode Guru</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Masukkan kata sandi guru untuk mengelola aplikasi.</p>
+            </div>
+
+            <form onsubmit="submitTeacherLogin(event)" class="flex flex-col gap-3 text-left">
+                <div>
+                    <input type="password" id="teacherPasswordInput" placeholder="Masukkan kata sandi guru..." required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm">
+                </div>
+                <div id="teacherLoginError" class="hidden text-xs text-red-600 font-semibold bg-red-50 p-2 rounded-lg border border-red-200">
+                    Kata sandi salah! Silakan coba lagi.
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl shadow transition text-sm">
+                    Masuk Mode Guru
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="teacherDashboardModal" class="hidden fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 overflow-hidden">
+        <div class="bg-white rounded-3xl max-w-5xl w-full h-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-sliders"></i>
+                    </span>
+                    <div>
+                        <h2 class="font-playful font-bold text-lg leading-none">Dashboard Pengelolaan NALAROO</h2>
+                        <p class="text-xs text-slate-400 mt-1">Kelola Segmen, Media, Soal & Riset Data Kontekstual</p>
+                    </div>
+                </div>
+                <button onclick="closeTeacherDashboard()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Tutup & Simpan
+                </button>
+            </div>
+
+            <!-- Modal Body Editor -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50">
+                <!-- BGM & Global Settings Panel -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-playful font-bold text-base text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-music text-sky-600"></i> Musik Latar & Kalimat Penyemangat Reflektif
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Unggah Musik Latar (BGM):</label>
+                            <input type="file" accept="audio/*" onchange="handleBgmUpload(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+                            <!-- BGM Play/Stop Testing Buttons -->
+                            <div class="flex items-center gap-2 mt-2">
+                                <button type="button" onclick="playTestBgm()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-play"></i> Tes Uji Putar
+                                </button>
+                                <button type="button" onclick="stopTestBgm()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-stop"></i> Hentikan
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Pesan Reflektif / Penyemangat Guru (Di Akhir Segmen Terakhir):</label>
+                            <textarea id="teacherEncouragementInput" oninput="updateTeacherEncouragement(this.value)" rows="3" placeholder="Tuliskan kalimat penyemangat untuk murid. Gunakan {nama} untuk menyebut nama murid..." class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-sky-200 outline-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segments Manager Container (Two Column Editor) -->
+                <div id="teacherSegmentsList" class="space-y-6">
+                    <!-- Dynamic two-column segments editor -->
+                </div>
+
+                <!-- BPS Research Assistant Hub -->
+                <div class="bg-gradient-to-r from-sky-900 to-indigo-950 rounded-2xl p-6 text-white shadow-lg space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 bg-sky-500/20 text-sky-300 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                        <div>
+                            <h3 class="font-playful font-bold text-lg">Pusat Riset Data Kontekstual BPS & Lembaga Resmi</h3>
+                            <p class="text-xs text-sky-200">Bantu guru merancang stimulus numerasi/literasi nyata dengan data resmi BPS.</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="bpsSearchQuery" placeholder="Contoh: Produksi Padi Jawa Barat, Data Literasi Digital 2025..." class="flex-1 px-4 py-2.5 rounded-xl text-slate-800 text-xs outline-none focus:ring-2 focus:ring-sky-400">
+                        <button onclick="runContextualResearch()" class="bg-amber-500 hover:bg-amber-600 font-bold px-4 py-2.5 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass"></i> Cari Data Kontekstual
+                        </button>
+                    </div>
+                    <div id="bpsResearchResults" class="hidden bg-white/10 rounded-xl p-4 text-xs space-y-3">
+                        <!-- AI Research Response -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="segmentTransitionModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-emerald-200 text-center space-y-4 transform">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner">
+                🎉
+            </div>
+            <div>
+                <h3 class="font-playful font-bold text-2xl text-slate-900">Luar Biasa! Segmen Selesai!</h3>
+                <p class="text-xs text-slate-600 mt-1">Kamu telah menyelesaikan seluruh soal pada segmen ini dengan 100% BENAR!</p>
+            </div>
+            <button onclick="closeSegmentTransitionModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-playful font-bold py-3 rounded-xl shadow-lg transition">
+                Lanjut ke Segmen Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const APP_STORAGE_KEY = 'NALAROO_CONFIG_V3_0';
+        const DEFAULT_CONFIG = {
+            encouragement: 'Hebat sekali {nama}! Kamu telah menyelesaikan petualangan literasi & numerasi NALAROO dengan luar biasa! Teruslah bersemangat dan berani menalar dunia di sekitarmu! 🌟',
+            bgmUrl: '',
+            segments: [
+                {
+                    id: 'seg_1',
+                    title: 'Segmen 1: Petualangan Hutan Angka',
+                    shortDesc: 'Selamat datang di Hutan Angka! Dengarkan instruksi dan pecahkan teka-teki numerasi di bawah ini.',
+                    mediaType: 'none',
+                    mediaUrl: '',
+                    mediaNote: '',
+                    questions: [
+                        {
+                            id: 'q_1',
+                            type: 'mcq',
+                            text: 'Di dalam Hutan Angka terdapat 15 ekor burung dan 25 ekor kelinci. Berapakah jumlah total hewan tersebut?',
+                            options: ['35 ekor', '40 ekor', '45 ekor', '50 ekor'],
+                            correctAnswer: '40 ekor',
+                            correctAnswers: ['40 ekor'],
+                            stimulusUrl: '',
+                            stimulusNote: ''
+                        }
+                    ]
+                },
+                {
+                    id: 'seg_2',
+                    title: 'Segmen 2: Jelajah Literasi Nusantara',
+                    shortDesc: 'Mari mengeksplorasi cerita dan teks literasi Nusantara yang kaya akan ilmu pengetahuan.',
+                    mediaType: 'none',
+                    mediaUrl: '',
+                    mediaNote: '',
+                    questions: [
+                        {
+                            id: 'q_2',
+                            type: 'mcq',
+                            text: 'Aktivitas menalar informasi dari sebuah bacaan disebut dengan...',
+                            options: ['Membaca Cepat', 'Literasi', 'Menghafal', 'Menulis'],
+                            correctAnswer: 'Literasi',
+                            correctAnswers: ['Literasi'],
+                            stimulusUrl: '',
+                            stimulusNote: ''
+                        }
+                    ]
+                }
+            ]
+        };
+
+        function loadConfigFromStorage() {
+            try {
+                const stored = localStorage.getItem(APP_STORAGE_KEY);
+                return stored ? JSON.parse(stored) : DEFAULT_CONFIG;
+            } catch (e) {
+                console.warn('LocalStorage access error, falling back to memory state:', e);
+                return DEFAULT_CONFIG;
+            }
+        }
+
+        function saveConfigToStorage() {
+            try {
+                localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(gameConfig));
+            } catch (e) {
+                console.warn('LocalStorage save error:', e);
+            }
+        }
+
+        let gameConfig = loadConfigFromStorage();
+        let playerProfile = { name: 'Siswa', avatar: '🐰', score: 0 };
+        let currentSegmentIdx = 0;
+        let teacherActiveSegIdx = 0;
+        let userAnswers = {};
+        let bgmAudio = new Audio();
+        bgmAudio.loop = true;
+        let narratorVolume = 1.0;
+
+        // Lazy AudioContext initialization
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) { console.warn(e); }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playCorrectChime() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const freqs = [523.25, 659.25, 783.99, 1046.50];
+                freqs.forEach((f, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.3);
+                });
+            } catch (e) { console.log(e); }
+        }
+
+        function playWrongBuzz() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } catch (e) { console.log(e); }
+        }
+
+        let availableVoices = [];
+        function loadVoices() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+        }
+        if ('speechSynthesis' in window) {
+            loadVoices();
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function getIndonesianVoice() {
+            if (availableVoices.length === 0) loadVoices();
+            return availableVoices.find(v => v.name.includes('Google Bahasa Indonesia') || v.name.includes('Damayanti')) ||
+                   availableVoices.find(v => v.lang.includes('id') || v.lang.includes('ID') || v.name.toLowerCase().includes('indonesian')) ||
+                   null;
+        }
+
+        function readNarratorScript(text) {
+            if (!('speechSynthesis' in window) || !text) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.90;
+            utterance.pitch = 1.05;
+            utterance.volume = narratorVolume;
+
+            const idVoice = getIndonesianVoice();
+            if (idVoice) {
+                utterance.voice = idVoice;
+                utterance.lang = idVoice.lang;
+            } else {
+                utterance.lang = 'id-ID';
+            }
+            window.speechSynthesis.speak(utterance);
+        }
+
+        window.onload = function() {
+            renderAvatarGrid();
+            renderSegmentTabs();
+            renderCurrentSegment();
+        };
+
+        const avatars = ['🐰', '🐼', '🐱', '🌸', '🌻', '🌷'];
+        let selectedAvatar = '🐰';
+
+        function renderAvatarGrid() {
+            const grid = document.getElementById('avatarSelectorGrid');
+            if (!grid) return;
+            grid.innerHTML = avatars.map(a => `
+                <button type="button" onclick="selectAvatar('${a}')" class="w-11 h-11 text-2xl rounded-xl border ${selectedAvatar === a ? 'border-sky-500 bg-sky-100 ring-2 ring-sky-300' : 'border-slate-200 bg-slate-50'} hover:scale-105 transition flex items-center justify-center">
+                    ${a}
+                </button>
+            `).join('');
+        }
+
+        function selectAvatar(a) {
+            selectedAvatar = a;
+            renderAvatarGrid();
+        }
+
+        function submitWelcomeForm(e) {
+            e.preventDefault();
+            const name = document.getElementById('welcomeNameInput').value.trim();
+            if (!name) return;
+            playerProfile.name = name;
+            playerProfile.avatar = selectedAvatar;
+
+            document.getElementById('playerNameDisplay').innerText = playerProfile.name;
+            document.getElementById('playerAvatarDisplay').innerText = playerProfile.avatar;
+            document.getElementById('playerBadge').classList.remove('hidden');
+            document.getElementById('playerBadge').classList.add('flex');
+
+            document.getElementById('welcomeModal').classList.add('hidden');
+            renderCurrentSegment();
+        }
+
+        function openTeacherLoginModal() {
+            document.getElementById('teacherPasswordInput').value = '';
+            document.getElementById('teacherLoginError').classList.add('hidden');
+            document.getElementById('teacherLoginModal').classList.remove('hidden');
+        }
+
+        function closeTeacherLoginModal() {
+            document.getElementById('teacherLoginModal').classList.add('hidden');
+        }
+
+        function submitTeacherLogin(e) {
+            e.preventDefault();
+            const pwd = document.getElementById('teacherPasswordInput').value;
+            if (pwd === '010101') {
+                closeTeacherLoginModal();
+                openTeacherDashboard();
+            } else {
+                document.getElementById('teacherLoginError').classList.remove('hidden');
+            }
+        }
+
+        function openTeacherDashboard() {
+            document.getElementById('teacherEncouragementInput').value = gameConfig.encouragement || '';
+            renderTeacherSegmentsList();
+            document.getElementById('teacherDashboardModal').classList.remove('hidden');
+        }
+
+        function closeTeacherDashboard() {
+            saveConfigToStorage();
+            document.getElementById('teacherDashboardModal').classList.add('hidden');
+            renderSegmentTabs();
+            renderCurrentSegment();
+        }
+
+        function isQuestionCorrect(q) {
+            const uAns = userAnswers[q.id];
+            if (uAns === undefined || uAns === null) return false;
+            const qType = q.type || 'mcq';
+
+            if (qType === 'reflective') {
+                return String(uAns).trim().length > 0;
+            }
+
+            if (qType === 'complex') {
+                const userArr = Array.isArray(uAns) ? uAns : [];
+                const correctArr = Array.isArray(q.correctAnswers) ? q.correctAnswers : (Array.isArray(q.correctAnswer) ? [q.correctAnswer] : []);
+                if (userArr.length !== correctArr.length) return false;
+                const sortedUser = [...userArr].map(s => String(s).trim()).sort();
+                const sortedCorrect = [...correctArr].map(s => String(s).trim()).sort();
+                return sortedUser.every((val, idx) => val === sortedCorrect[idx]);
+            }
+
+            return String(uAns).trim() === String(q.correctAnswer || '').trim();
+        }
+
+        function isSegmentCompleted(segIdx) {
+            const seg = gameConfig.segments[segIdx];
+            if (!seg || !seg.questions || seg.questions.length === 0) return true;
+            return seg.questions.every(q => isQuestionCorrect(q));
+        }
+
+        function isSegmentUnlocked(segIdx) {
+            if (segIdx === 0) return true;
+            for (let i = 0; i < segIdx; i++) {
+                if (!isSegmentCompleted(i)) return false;
+            }
+            return true;
+        }
+
+        function switchSegment(idx) {
+            if (!isSegmentUnlocked(idx)) return;
+            currentSegmentIdx = idx;
+            renderSegmentTabs();
+            renderCurrentSegment();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderSegmentTabs() {
+            const container = document.getElementById('segmentTabs');
+            if (!container) return;
+            container.innerHTML = gameConfig.segments.map((seg, idx) => {
+                const unlocked = isSegmentUnlocked(idx);
+                const active = currentSegmentIdx === idx;
+                return `
+                    <button onclick="switchSegment(${idx})" ${!unlocked ? 'disabled' : ''} class="px-4 py-2 rounded-xl font-playful text-xs font-bold transition flex items-center gap-2 ${active ? 'bg-sky-600 text-white shadow-md' : unlocked ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed'}">
+                        <i class="fa-solid ${unlocked ? (isSegmentCompleted(idx) ? 'fa-circle-check text-emerald-400' : 'fa-folder-open') : 'fa-lock'}"></i>
+                        <span>${seg.title}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderCurrentSegment() {
+            const container = document.getElementById('segmentViewContainer');
+            if (!container) return;
+            const seg = gameConfig.segments[currentSegmentIdx];
+            if (!seg) {
+                container.innerHTML = '<div class="text-center py-10 text-slate-500">Segmen tidak ditemukan.</div>';
+                return;
+            }
+
+            const isLastSegment = currentSegmentIdx === gameConfig.segments.length - 1;
+
+            let html = `
+                <!-- Segment Header & Narrator Card -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full">Segmen ${currentSegmentIdx + 1} dari ${gameConfig.segments.length}</span>
+                        <h2 class="font-playful font-bold text-2xl text-slate-900">${seg.title}</h2>
+                        <p class="text-sm text-slate-600">${seg.shortDesc}</p>
+                    </div>
+                    <button onclick="readNarratorScript(gameConfig.segments[${currentSegmentIdx}].shortDesc)" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-2xl font-bold text-xs transition flex items-center gap-2 shrink-0">
+                        <i class="fa-solid fa-volume-high text-sky-600"></i>
+                        <span>Dengarkan Narator</span>
+                    </button>
+                </div>
+            `;
+
+            if (seg.mediaUrl) {
+                html += `
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-3">
+                        ${seg.mediaNote ? `<div class="bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold p-3 rounded-xl flex items-center gap-2"><i class="fa-solid fa-circle-info text-amber-600"></i> ${seg.mediaNote}</div>` : ''}
+                        <div class="rounded-2xl overflow-hidden bg-slate-900 flex justify-center items-center min-h-[250px]">
+                            ${renderMediaEmbed(seg.mediaUrl)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `<div class="space-y-6">`;
+            seg.questions.forEach((q, qIdx) => {
+                const qType = q.type || 'mcq';
+                const uAns = userAnswers[q.id];
+
+                html += `
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 bg-sky-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">${qIdx + 1}</span>
+                                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-lg border ${
+                                    qType === 'complex' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                                    qType === 'tf' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                    qType === 'reflective' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                    'bg-sky-50 text-sky-700 border-sky-200'
+                                }">
+                                    ${
+                                        qType === 'complex' ? 'Pilihan Ganda Kompleks' :
+                                        qType === 'tf' ? 'Benar / Salah' :
+                                        qType === 'reflective' ? 'Pertanyaan Reflektif' :
+                                        'Pilihan Ganda'
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-base font-semibold text-slate-800 leading-relaxed">${q.text}</div>
+
+                        ${q.stimulusUrl ? `
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                                ${q.stimulusNote ? `<p class="text-xs font-bold text-slate-700"><i class="fa-solid fa-note-sticky text-sky-600"></i> ${q.stimulusNote}</p>` : ''}
+                                <div class="max-h-80 overflow-hidden rounded-xl flex justify-center bg-slate-900">${renderMediaEmbed(q.stimulusUrl)}</div>
+                            </div>
+                        ` : ''}
+
+                        ${renderStudentQuestionInput(q, uAns)}
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            if (isLastSegment && gameConfig.encouragement) {
+                const finalMsg = gameConfig.encouragement.replace('{nama}', playerProfile.name);
+                html += `
+                    <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-3xl p-6 shadow-lg space-y-2 mt-4">
+                        <div class="flex items-center gap-2 text-amber-100 font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-heart"></i> Pesan Reflektif Guru
+                        </div>
+                        <p class="font-playful font-semibold text-lg leading-relaxed">${finalMsg}</p>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderStudentQuestionInput(q, uAns) {
+            const qType = q.type || 'mcq';
+
+            if (qType === 'reflective') {
+                return `
+                    <div class="space-y-2 pt-2">
+                        <label class="block text-xs font-bold text-slate-600">Tuliskan tanggapan / refleksi kamu di bawah ini:</label>
+                        <textarea onchange="handleReflectiveAnswer('${q.id}', this.value)" rows="4" placeholder="Tuliskan jawaban atau pemikiranmu dengan jelas..." class="w-full p-3.5 rounded-2xl border border-slate-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-sm bg-slate-50">${uAns || ''}</textarea>
+                        ${uAns ? '<p class="text-xs text-emerald-600 font-bold flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Tanggapan telah tersimpan!</p>' : ''}
+                    </div>
+                `;
+            }
+
+            if (qType === 'complex') {
+                const currentSelected = Array.isArray(uAns) ? uAns : [];
+                return `
+                    <div class="space-y-2 pt-2">
+                        <p class="text-xs text-slate-500 italic mb-1">*Pilihlah satu atau lebih jawaban yang tepat dengan menekan opsi di bawah ini:</p>
+                        <div class="grid grid-cols-1 gap-2.5">
+                            ${q.options.map((opt, optIdx) => {
+                                const isChecked = currentSelected.includes(opt);
+                                return `
+                                    <button onclick="handleToggleComplexAnswer('${q.id}', ${optIdx})" class="w-full text-left p-3.5 rounded-2xl border ${isChecked ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold ring-2 ring-indigo-200' : 'border-slate-200 hover:border-slate-300 bg-slate-50'} transition flex items-center gap-3 text-sm">
+                                        <span class="w-6 h-6 rounded-lg border ${isChecked ? 'bg-indigo-600 text-white border-indigo-600' : 'border-slate-300 bg-white'} text-xs font-bold flex items-center justify-center">
+                                            <i class="fa-solid ${isChecked ? 'fa-check' : 'fa-square'}"></i>
+                                        </span>
+                                        <span class="flex-1">${opt}</span>
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="grid grid-cols-1 gap-2.5 pt-2">
+                    ${q.options.map((opt, optIdx) => {
+                        const isSelected = uAns === opt;
+                        return `
+                            <button onclick="handleSelectAnswer('${q.id}', ${optIdx})" class="w-full text-left p-3.5 rounded-2xl border ${isSelected ? 'border-sky-500 bg-sky-50 text-sky-950 font-bold ring-2 ring-sky-200' : 'border-slate-200 hover:border-slate-300 bg-slate-50'} transition flex items-center gap-3 text-sm">
+                                <span class="w-6 h-6 rounded-lg border ${isSelected ? 'bg-sky-600 text-white border-sky-600' : 'border-slate-300 bg-white'} text-xs font-bold flex items-center justify-center">${String.fromCharCode(65 + optIdx)}</span>
+                                <span class="flex-1">${opt}</span>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderMediaEmbed(url) {
+            if (!url) return '';
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                const id = (match && match[2].length === 11) ? match[2] : null;
+                return id ? `<iframe class="w-full aspect-video rounded-xl" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe>` : `<a href="${url}" target="_blank" class="text-sky-400 underline p-4">Buka Tautan Media</a>`;
+            }
+            if (url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) || url.startsWith('data:image')) {
+                return `<img src="${url}" class="max-h-80 object-contain rounded-xl" />`;
+            }
+            if (url.match(/\.(mp3|wav|ogg|m4a)$/i) || url.startsWith('data:audio')) {
+                return `<audio controls class="w-full my-2"><source src="${url}"></audio>`;
+            }
+            if (url.match(/\.(mp4|webm|ogg)$/i) || url.startsWith('data:video')) {
+                return `<video controls class="max-h-80 w-full rounded-xl"><source src="${url}"></video>`;
+            }
+            return `<iframe src="${url}" class="w-full h-80 rounded-xl bg-white" frameborder="0"></iframe>`;
+        }
+
+        function handleSelectAnswer(qId, optIdx) {
+            const seg = gameConfig.segments[currentSegmentIdx];
+            const q = seg.questions.find(x => x.id === qId);
+            if (!q) return;
+
+            const selectedOpt = q.options[optIdx];
+            userAnswers[qId] = selectedOpt;
+
+            if (isQuestionCorrect(q)) {
+                playCorrectChime();
+                playerProfile.score += 10;
+                document.getElementById('playerScoreDisplay').innerText = `${playerProfile.score} Pts`;
+            } else {
+                playWrongBuzz();
+            }
+
+            renderCurrentSegment();
+            checkSegmentCompletion();
+        }
+
+        function handleToggleComplexAnswer(qId, optIdx) {
+            const seg = gameConfig.segments[currentSegmentIdx];
+            const q = seg.questions.find(x => x.id === qId);
+            if (!q) return;
+
+            let currentSelected = Array.isArray(userAnswers[qId]) ? [...userAnswers[qId]] : [];
+            const targetOpt = q.options[optIdx];
+
+            if (currentSelected.includes(targetOpt)) {
+                currentSelected = currentSelected.filter(item => item !== targetOpt);
+            } else {
+                currentSelected.push(targetOpt);
+            }
+
+            userAnswers[qId] = currentSelected;
+
+            if (isQuestionCorrect(q)) {
+                playCorrectChime();
+                playerProfile.score += 10;
+                document.getElementById('playerScoreDisplay').innerText = `${playerProfile.score} Pts`;
+            }
+
+            renderCurrentSegment();
+            checkSegmentCompletion();
+        }
+
+        function handleReflectiveAnswer(qId, val) {
+            userAnswers[qId] = val;
+            const seg = gameConfig.segments[currentSegmentIdx];
+            const q = seg.questions.find(x => x.id === qId);
+            if (q && isQuestionCorrect(q)) {
+                playCorrectChime();
+            }
+            renderCurrentSegment();
+            checkSegmentCompletion();
+        }
+
+        function checkSegmentCompletion() {
+            if (isSegmentCompleted(currentSegmentIdx)) {
+                setTimeout(() => {
+                    document.getElementById('segmentTransitionModal').classList.remove('hidden');
+                }, 400);
+            }
+        }
+
+        function closeSegmentTransitionModal() {
+            document.getElementById('segmentTransitionModal').classList.add('hidden');
+            if (currentSegmentIdx < gameConfig.segments.length - 1) {
+                switchSegment(currentSegmentIdx + 1);
+            }
+        }
+
+        function toggleBgm() {
+            if (bgmAudio.paused) {
+                bgmAudio.play().catch(() => {});
+                document.getElementById('bgmIcon').className = 'fa-solid fa-volume-high text-sky-600';
+            } else {
+                bgmAudio.pause();
+                document.getElementById('bgmIcon').className = 'fa-solid fa-volume-xmark text-slate-400';
+            }
+        }
+
+        function updateBgmVolume(val) {
+            bgmAudio.volume = parseFloat(val);
+        }
+
+        function updateNarratorVolume(val) {
+            narratorVolume = parseFloat(val);
+        }
+
+        function handleBgmUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    gameConfig.bgmUrl = evt.target.result;
+                    bgmAudio.src = gameConfig.bgmUrl;
+                    saveConfigToStorage();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function playTestBgm() {
+            if (gameConfig.bgmUrl) {
+                bgmAudio.src = gameConfig.bgmUrl;
+                bgmAudio.play().catch(() => {});
+            }
+        }
+
+        function stopTestBgm() {
+            bgmAudio.pause();
+        }
+
+        function updateTeacherEncouragement(val) {
+            gameConfig.encouragement = val;
+            saveConfigToStorage();
+        }
+
+        function selectTeacherActiveSegment(idx) {
+            teacherActiveSegIdx = idx;
+            renderTeacherSegmentsList();
+        }
+
+        function renderTeacherSegmentsList() {
+            const container = document.getElementById('teacherSegmentsList');
+            if (!container) return;
+
+            if (!gameConfig.segments || gameConfig.segments.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs">Belum ada segmen. Klik "+ Tambah Segmen Baru".</div>';
+                return;
+            }
+
+            if (teacherActiveSegIdx >= gameConfig.segments.length) {
+                teacherActiveSegIdx = Math.max(0, gameConfig.segments.length - 1);
+            }
+
+            const activeSeg = gameConfig.segments[teacherActiveSegIdx];
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    <!-- Bilah Kiri: Daftar Segmen Navigasi -->
+                    <div class="md:col-span-4 bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <h4 class="font-playful font-bold text-sm text-slate-800">Daftar Segmen</h4>
+                            <button onclick="addSegment()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-xl shadow transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Tambah
+                            </button>
+                        </div>
+                        <div class="space-y-2 max-h-[520px] overflow-y-auto custom-scrollbar pr-1">
+                            ${gameConfig.segments.map((s, idx) => `
+                                <button type="button" onclick="selectTeacherActiveSegment(${idx})" class="w-full text-left p-3 rounded-xl border transition flex items-center justify-between gap-2 ${teacherActiveSegIdx === idx ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold shadow-sm ring-1 ring-sky-200' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}">
+                                    <div class="truncate text-xs">
+                                        <span class="text-[10px] uppercase block ${teacherActiveSegIdx === idx ? 'text-sky-600 font-bold' : 'text-slate-400'}">Segmen ${idx + 1}</span>
+                                        <span class="truncate block">${s.title || 'Segmen Tanpa Judul'}</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs ${teacherActiveSegIdx === idx ? 'text-sky-600' : 'text-slate-300'}"></i>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Bilah Kanan: Panel Editor Segmen Aktif -->
+                    <div class="md:col-span-8 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between border-b pb-3 gap-3">
+                            <div class="flex-1">
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Judul Segmen ${teacherActiveSegIdx + 1}:</label>
+                                <input type="text" value="${activeSeg.title}" onchange="updateSegmentField(${teacherActiveSegIdx}, 'title', this.value)" class="font-bold text-base text-slate-900 border-b border-dashed border-slate-300 focus:border-sky-500 outline-none w-full">
+                            </div>
+                            ${gameConfig.segments.length > 1 ? `
+                                <button onclick="deleteSegment(${teacherActiveSegIdx})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-trash"></i> Hapus Segmen
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Deskripsi Singkat (Dibaca Narator):</label>
+                                <textarea onchange="updateSegmentField(${teacherActiveSegIdx}, 'shortDesc', this.value)" rows="6" class="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-sky-200 outline-none text-xs">${activeSeg.shortDesc || ''}</textarea>
+                            </div>
+                            <div class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <label class="block font-bold text-slate-700">Media Utama Segmen:</label>
+                                <div>
+                                    <label class="block text-[11px] text-slate-600 mb-1">Unggah Berkas Media Utama (Gambar/Audio/Video/Dokumen):</label>
+                                    <input type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx" onchange="handleSegmentMediaUpload(event, ${teacherActiveSegIdx})" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-600 mb-1">Atau Tempel URL/Tautan Online (YouTube, Canva, dll):</label>
+                                    <input type="text" value="${activeSeg.mediaUrl || ''}" onchange="updateSegmentField(${teacherActiveSegIdx}, 'mediaUrl', this.value)" placeholder="Tempel URL YouTube, Canva, Gambar..." class="w-full p-2 border rounded-xl text-xs bg-white">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Catatan Perintah/Informasi Media Utama:</label>
+                                    <input type="text" value="${activeSeg.mediaNote || ''}" onchange="updateSegmentField(${teacherActiveSegIdx}, 'mediaNote', this.value)" placeholder="Instruksi tambahan untuk media utama..." class="w-full p-2 border rounded-xl text-xs bg-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Daftar Soal & Latihan -->
+                        <div class="pt-3 space-y-4 border-t border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500">Soal & Latihan (${activeSeg.questions.length})</h4>
+                                <button onclick="addQuestion(${teacherActiveSegIdx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-plus"></i> Tambah Soal
+                                </button>
+                            </div>
+
+                            ${activeSeg.questions.map((q, qIdx) => renderTeacherQuestionItem(teacherActiveSegIdx, q, qIdx)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTeacherQuestionItem(sIdx, q, qIdx) {
+            const qType = q.type || 'mcq';
+            return `
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-bold text-sky-700">Soal #${qIdx + 1}</span>
+                        <button onclick="deleteQuestion(${sIdx}, ${qIdx})" class="text-rose-600 font-bold hover:underline">Hapus Soal</button>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold mb-1">Model / Tipe Soal:</label>
+                        <select onchange="updateQuestionType(${sIdx}, ${qIdx}, this.value)" class="w-full p-2 border rounded-lg bg-white font-bold text-slate-800 focus:ring-2 focus:ring-sky-200 outline-none">
+                            <option value="mcq" ${qType === 'mcq' ? 'selected' : ''}>Pilihan Ganda (1 Jawaban Benar)</option>
+                            <option value="complex" ${qType === 'complex' ? 'selected' : ''}>Pilihan Ganda Kompleks (Centang Banyak)</option>
+                            <option value="tf" ${qType === 'tf' ? 'selected' : ''}>Benar / Salah</option>
+                            <option value="reflective" ${qType === 'reflective' ? 'selected' : ''}>Pertanyaan Reflektif / Isian (Tanpa Kunci Jawaban)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold mb-1">Pertanyaan / Teks Soal:</label>
+                        <textarea onchange="updateQuestionField(${sIdx}, ${qIdx}, 'text', this.value)" class="w-full p-2 border rounded-lg bg-white">${q.text}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 bg-white p-3 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block font-bold mb-1 text-[11px]">Unggah Berkas Stimulus:</label>
+                            <input type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx" onchange="handleQuestionStimulusUpload(event, ${sIdx}, ${qIdx})" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-[11px]">Atau Tempel URL Online:</label>
+                            <input type="text" value="${q.stimulusUrl || ''}" onchange="updateQuestionField(${sIdx}, ${qIdx}, 'stimulusUrl', this.value)" placeholder="URL YouTube, Canva, Drive..." class="w-full p-1.5 border rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-[11px]">Catatan Perintah Stimulus:</label>
+                            <input type="text" value="${q.stimulusNote || ''}" onchange="updateQuestionField(${sIdx}, ${qIdx}, 'stimulusNote', this.value)" placeholder="Instruksi stimulus..." class="w-full p-1.5 border rounded-lg text-xs">
+                        </div>
+                    </div>
+
+                    ${renderTeacherAnswerSettings(sIdx, q, qIdx)}
+                </div>
+            `;
+        }
+
+        function renderTeacherAnswerSettings(sIdx, q, qIdx) {
+            const qType = q.type || 'mcq';
+
+            if (qType === 'reflective') {
+                return `
+                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-purple-900 space-y-1">
+                        <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-purple-600"></i> Pertanyaan Reflektif / Isian</p>
+                        <p class="text-[11px]">Soal jenis ini tidak memerlukan kunci jawaban. Murid dapat mengisikan pandangan, jawaban singkat, atau refleksi mereka secara bebas pada kolom teks.</p>
+                    </div>
+                `;
+            }
+
+            if (qType === 'tf') {
+                return `
+                    <div class="space-y-2">
+                        <label class="block font-bold text-slate-700">Pilih Kunci Jawaban Benar:</label>
+                        <select onchange="updateQuestionField(${sIdx}, ${qIdx}, 'correctAnswer', this.value)" class="w-full p-2 border rounded-lg bg-white font-bold text-emerald-700">
+                            <option value="Benar" ${String(q.correctAnswer) === 'Benar' ? 'selected' : ''}>Benar</option>
+                            <option value="Salah" ${String(q.correctAnswer) === 'Salah' ? 'selected' : ''}>Salah</option>
+                        </select>
+                    </div>
+                `;
+            }
+
+            if (qType === 'complex') {
+                const currentCorrects = Array.isArray(q.correctAnswers) ? q.correctAnswers : (Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer]);
+                return `
+                    <div class="space-y-2">
+                        <label class="block font-bold">Baris Pilihan Jawaban (Centang semua jawaban yang benar):</label>
+                        ${q.options.map((opt, optIdx) => {
+                            const isChecked = currentCorrects.includes(opt);
+                            return `
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleComplexKeyIndex(${sIdx}, ${qIdx}, ${optIdx})" class="w-4 h-4 accent-indigo-600 cursor-pointer">
+                                    <span class="w-5 text-center font-bold text-sky-700">${String.fromCharCode(65 + optIdx)}</span>
+                                    <input type="text" value="${opt}" onchange="updateOptionField(${sIdx}, ${qIdx}, ${optIdx}, this.value)" class="flex-1 p-1.5 border rounded-lg bg-white">
+                                    <button onclick="deleteOptionField(${sIdx}, ${qIdx}, ${optIdx})" class="text-rose-600 font-bold px-1.5 hover:bg-rose-50 rounded">✕</button>
+                                </div>
+                            `;
+                        }).join('')}
+                        <button onclick="addOptionField(${sIdx}, ${qIdx})" class="text-sky-600 font-bold text-[11px] mt-1 hover:underline">+ Tambah Baris Opsi</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="space-y-2">
+                    <label class="block font-bold">Baris Pilihan Jawaban:</label>
+                    ${q.options.map((opt, optIdx) => `
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 text-center font-bold text-sky-700">${String.fromCharCode(65 + optIdx)}</span>
+                            <input type="text" value="${opt}" onchange="updateOptionField(${sIdx}, ${qIdx}, ${optIdx}, this.value)" class="flex-1 p-1.5 border rounded-lg bg-white">
+                            <button onclick="deleteOptionField(${sIdx}, ${qIdx}, ${optIdx})" class="text-rose-600 font-bold px-1.5 hover:bg-rose-50 rounded">✕</button>
+                        </div>
+                    `).join('')}
+                    <button onclick="addOptionField(${sIdx}, ${qIdx})" class="text-sky-600 font-bold text-[11px] mt-1 hover:underline">+ Tambah Baris Opsi</button>
+
+                    <div>
+                        <label class="block font-bold mb-1">Pilih Kunci Jawaban Benar:</label>
+                        <select onchange="updateQuestionField(${sIdx}, ${qIdx}, 'correctAnswer', this.value)" class="w-full p-2 border rounded-lg bg-white font-semibold text-slate-800">
+                            ${q.options.map(opt => `
+                                <option value="${opt}" ${String(q.correctAnswer).trim() === String(opt).trim() ? 'selected' : ''}>${opt}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQuestionType(sIdx, qIdx, newType) {
+            const q = gameConfig.segments[sIdx].questions[qIdx];
+            q.type = newType;
+
+            if (newType === 'tf') {
+                q.options = ['Benar', 'Salah'];
+                q.correctAnswer = 'Benar';
+            } else if (newType === 'complex') {
+                if (!Array.isArray(q.correctAnswers) || q.correctAnswers.length === 0) {
+                    q.correctAnswers = [q.options[0] || 'Opsi A'];
+                }
+            } else if (newType === 'mcq') {
+                q.correctAnswer = q.options[0] || 'Opsi A';
+            } else if (newType === 'reflective') {
+                q.correctAnswer = '';
+                q.correctAnswers = [];
+            }
+
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function toggleComplexKeyIndex(sIdx, qIdx, optIdx) {
+            const q = gameConfig.segments[sIdx].questions[qIdx];
+            const optVal = q.options[optIdx];
+            let list = Array.isArray(q.correctAnswers) ? [...q.correctAnswers] : [];
+
+            if (list.includes(optVal)) {
+                list = list.filter(x => x !== optVal);
+            } else {
+                list.push(optVal);
+            }
+
+            q.correctAnswers = list;
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function handleQuestionStimulusUpload(e, sIdx, qIdx) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    gameConfig.segments[sIdx].questions[qIdx].stimulusUrl = evt.target.result;
+                    saveConfigToStorage();
+                    renderTeacherSegmentsList();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleSegmentMediaUpload(e, sIdx) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    gameConfig.segments[sIdx].mediaUrl = evt.target.result;
+                    saveConfigToStorage();
+                    renderTeacherSegmentsList();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateSegmentField(sIdx, field, val) {
+            gameConfig.segments[sIdx][field] = val;
+            saveConfigToStorage();
+        }
+
+        function addSegment() {
+            gameConfig.segments.push({
+                id: 'seg_' + Date.now(),
+                title: 'Segmen Baru',
+                shortDesc: 'Deskripsi segmen baru...',
+                mediaType: 'none',
+                mediaUrl: '',
+                mediaNote: '',
+                questions: []
+            });
+            teacherActiveSegIdx = gameConfig.segments.length - 1;
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function deleteSegment(sIdx) {
+            if (gameConfig.segments.length <= 1) return;
+            gameConfig.segments.splice(sIdx, 1);
+            if (teacherActiveSegIdx >= gameConfig.segments.length) {
+                teacherActiveSegIdx = Math.max(0, gameConfig.segments.length - 1);
+            }
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function addQuestion(sIdx) {
+            gameConfig.segments[sIdx].questions.push({
+                id: 'q_' + Date.now(),
+                type: 'mcq',
+                text: 'Pertanyaan baru...',
+                options: ['Opsi A', 'Opsi B'],
+                correctAnswer: 'Opsi A',
+                correctAnswers: ['Opsi A'],
+                stimulusUrl: '',
+                stimulusNote: ''
+            });
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function deleteQuestion(sIdx, qIdx) {
+            gameConfig.segments[sIdx].questions.splice(qIdx, 1);
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function updateQuestionField(sIdx, qIdx, field, val) {
+            gameConfig.segments[sIdx].questions[qIdx][field] = val;
+            saveConfigToStorage();
+        }
+
+        function updateOptionField(sIdx, qIdx, optIdx, val) {
+            const q = gameConfig.segments[sIdx].questions[qIdx];
+            const oldVal = q.options[optIdx];
+            q.options[optIdx] = val;
+
+            if (q.correctAnswer === oldVal) {
+                q.correctAnswer = val;
+            }
+
+            if (Array.isArray(q.correctAnswers)) {
+                q.correctAnswers = q.correctAnswers.map(x => x === oldVal ? val : x);
+            }
+
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function addOptionField(sIdx, qIdx) {
+            gameConfig.segments[sIdx].questions[qIdx].options.push('Opsi Baru');
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        function deleteOptionField(sIdx, qIdx, optIdx) {
+            const q = gameConfig.segments[sIdx].questions[qIdx];
+            if (q.options.length <= 1) return;
+            const removed = q.options.splice(optIdx, 1);
+
+            if (q.correctAnswer === removed[0]) {
+                q.correctAnswer = q.options[0];
+            }
+
+            if (Array.isArray(q.correctAnswers)) {
+                q.correctAnswers = q.correctAnswers.filter(x => x !== removed[0]);
+            }
+
+            saveConfigToStorage();
+            renderTeacherSegmentsList();
+        }
+
+        async function runContextualResearch() {
+            const query = document.getElementById('bpsSearchQuery').value.trim();
+            if (!query) return;
+            const resDiv = document.getElementById('bpsResearchResults');
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = '<p class="text-sky-300 font-bold"><i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke API Gemini & data kontekstual BPS...</p>';
+
+            try {
+                const systemPrompt = "Anda adalah asisten riset pendidikan BPS. Berikan ringkasan data statistik kontekstual nyata dalam format tabel sederhana dan stimulus numerasi.";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Cari data kontekstual BPS untuk riset materi pembelajaran: ${query}` }] }],
+                        tools: [{ "google_search": {} }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+                const result = await response.json();
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Data tidak ditemukan.';
+                resDiv.innerHTML = `
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-amber-300">Hasil Riset Data BPS:</h4>
+                        <div class="text-slate-200 whitespace-pre-wrap">${text}</div>
+                    </div>
+                `;
+            } catch (err) {
+                resDiv.innerHTML = '<p class="text-rose-300">Gagal mengambil data. Pastikan koneksi internet terhubung.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
